@@ -7,6 +7,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import About from './pages/About';
 import Services from './pages/Services';
+import Trading from './pages/Trading';
+import Education from './pages/Education';
+import Support from './pages/Support';
 import Contact from './pages/Contact';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -41,6 +44,9 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/trading" element={<Trading />} />
+            <Route path="/education" element={<Education />} />
+            <Route path="/support" element={<Support />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/dashboard" element={<ClientDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />

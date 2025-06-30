@@ -32,10 +32,19 @@ const Navbar = () => {
               Home
             </Link>
             <Link to="/about" className="text-white hover:text-yellow-400 transition-colors font-medium">
-              About Us
+              About
             </Link>
             <Link to="/services" className="text-white hover:text-yellow-400 transition-colors font-medium">
               Services
+            </Link>
+            <Link to="/trading" className="text-white hover:text-yellow-400 transition-colors font-medium">
+              Trading
+            </Link>
+            <Link to="/education" className="text-white hover:text-yellow-400 transition-colors font-medium">
+              Education
+            </Link>
+            <Link to="/support" className="text-white hover:text-yellow-400 transition-colors font-medium">
+              Support
             </Link>
             <Link to="/contact" className="text-white hover:text-yellow-400 transition-colors font-medium">
               Contact
@@ -96,10 +105,19 @@ const Navbar = () => {
               Home
             </Link>
             <Link to="/about" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
-              About Us
+              About
             </Link>
             <Link to="/services" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
               Services
+            </Link>
+            <Link to="/trading" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
+              Trading
+            </Link>
+            <Link to="/education" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
+              Education
+            </Link>
+            <Link to="/support" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
+              Support
             </Link>
             <Link to="/contact" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
               Contact
