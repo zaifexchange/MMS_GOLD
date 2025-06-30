@@ -86,7 +86,7 @@ const ClientDashboard = () => {
       <div className="space-y-8">
         {/* Welcome Header */}
         <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-2xl p-8 text-black">
-          <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.fullName}</h1>
+          <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.full_name}</h1>
           <p className="text-lg opacity-90">Ready to continue your gold trading journey?</p>
         </div>
 

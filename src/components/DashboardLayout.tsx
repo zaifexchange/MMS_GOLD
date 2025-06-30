@@ -44,12 +44,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               
               <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{user?.fullName}</p>
+                  <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
                   <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
                 <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center">
                   <span className="text-black font-bold text-sm">
-                    {user?.fullName?.charAt(0) || 'U'}
+                    {user?.full_name?.charAt(0) || 'U'}
                   </span>
                 </div>
               </div>

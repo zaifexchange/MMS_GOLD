@@ -87,49 +87,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (userData: RegisterData) => {
-    // First, sign up the user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: userData.email,
-      password: userData.password,
-      options: {
-        data: {
-          full_name: userData.fullName,
+    try {
+      // First, sign up the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            full_name: userData.fullName,
+          },
         },
-      },
-    });
+      });
 
-    if (authError) throw authError;
+      if (authError) throw authError;
 
-    if (authData.user) {
-      // Handle referral if provided
-      let referredBy = null;
-      if (userData.referralCode) {
-        const { data: referrer } = await supabase
+      if (authData.user) {
+        // Wait a moment for the trigger to create the profile
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Handle referral if provided
+        let referredBy = null;
+        if (userData.referralCode) {
+          const { data: referrer } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('referral_code', userData.referralCode)
+            .single();
+          
+          if (referrer) {
+            referredBy = referrer.id;
+          }
+        }
+
+        // Update profile with additional data
+        const { error: profileError } = await supabase
           .from('profiles')
-          .select('id')
-          .eq('referral_code', userData.referralCode)
-          .single();
-        
-        if (referrer) {
-          referredBy = referrer.id;
+          .update({
+            phone: userData.phone,
+            referred_by: referredBy,
+          })
+          .eq('id', authData.user.id);
+
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+          // Don't throw here as the user is already created
+        }
+
+        // Create referral relationships if user was referred
+        if (referredBy) {
+          try {
+            await createReferralChain(authData.user.id, referredBy);
+          } catch (referralError) {
+            console.error('Error creating referral chain:', referralError);
+            // Don't throw here as the user is already created
+          }
         }
       }
-
-      // Update profile with additional data
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          phone: userData.phone,
-          referred_by: referredBy,
-        })
-        .eq('id', authData.user.id);
-
-      if (profileError) throw profileError;
-
-      // Create referral relationships if user was referred
-      if (referredBy) {
-        await createReferralChain(authData.user.id, referredBy);
-      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
     }
   };
 
@@ -138,24 +154,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let currentReferrer = referrerId;
     
     for (let level = 1; level <= 3 && currentReferrer; level++) {
-      // Create referral record
-      await supabase
-        .from('referrals')
-        .insert({
-          referrer_id: currentReferrer,
-          referred_id: newUserId,
-          level,
-          commission_rate: referralRates[level - 1],
-        });
+      try {
+        // Create referral record
+        await supabase
+          .from('referrals')
+          .insert({
+            referrer_id: currentReferrer,
+            referred_id: newUserId,
+            level,
+            commission_rate: referralRates[level - 1],
+          });
 
-      // Get next level referrer
-      const { data: nextReferrer } = await supabase
-        .from('profiles')
-        .select('referred_by')
-        .eq('id', currentReferrer)
-        .single();
+        // Get next level referrer
+        const { data: nextReferrer } = await supabase
+          .from('profiles')
+          .select('referred_by')
+          .eq('id', currentReferrer)
+          .single();
 
-      currentReferrer = nextReferrer?.referred_by;
+        currentReferrer = nextReferrer?.referred_by;
+      } catch (error) {
+        console.error(`Error creating referral level ${level}:`, error);
+        break; // Stop the chain if there's an error
+      }
     }
   };
 
