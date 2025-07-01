@@ -36,8 +36,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if Supabase is properly configured
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.warn('Supabase not configured. Running in demo mode.');
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+        setLoading(false);
+        return;
+      }
+      
       setSession(session);
       if (session?.user) {
         fetchProfile(session.user.id);
@@ -68,8 +84,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
-      setUser(data);
+      if (error) {
+        console.error('Error fetching profile:', error);
+        // Create a basic user object if profile doesn't exist
+        setUser({
+          id: userId,
+          email: session?.user?.email || '',
+          full_name: session?.user?.user_metadata?.full_name || 'User',
+          role: 'client',
+          kyc_status: 'pending',
+          balance: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } as Profile);
+      } else {
+        setUser(data);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
