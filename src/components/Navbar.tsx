@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, TrendingUp, LogIn, UserPlus } from 'lucide-react';
+import { Menu, X, TrendingUp, LogIn, UserPlus, ShoppingCart, Bot } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
@@ -27,7 +27,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-6">
             <Link to="/" className="text-white hover:text-yellow-400 transition-colors font-medium">
               Home
             </Link>
@@ -39,6 +39,14 @@ const Navbar = () => {
             </Link>
             <Link to="/trading" className="text-white hover:text-yellow-400 transition-colors font-medium">
               Trading
+            </Link>
+            <Link to="/gold-shop" className="text-white hover:text-yellow-400 transition-colors font-medium flex items-center space-x-1">
+              <ShoppingCart className="h-4 w-4" />
+              <span>Gold Shop</span>
+            </Link>
+            <Link to="/trading-tools" className="text-white hover:text-yellow-400 transition-colors font-medium flex items-center space-x-1">
+              <Bot className="h-4 w-4" />
+              <span>Trading Tools</span>
             </Link>
             <Link to="/education" className="text-white hover:text-yellow-400 transition-colors font-medium">
               Education
@@ -86,7 +94,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-white hover:text-yellow-400 transition-colors"
@@ -99,7 +107,7 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden bg-gray-900 border-t border-gray-700">
+        <div className="lg:hidden bg-gray-900 border-t border-gray-700">
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link to="/" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
               Home
@@ -112,6 +120,12 @@ const Navbar = () => {
             </Link>
             <Link to="/trading" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
               Trading
+            </Link>
+            <Link to="/gold-shop" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
+              Gold Shop
+            </Link>
+            <Link to="/trading-tools" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
+              Trading Tools
             </Link>
             <Link to="/education" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
               Education

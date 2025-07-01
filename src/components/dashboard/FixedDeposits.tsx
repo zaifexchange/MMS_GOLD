@@ -323,6 +323,28 @@ const FixedDeposits = () => {
                 </div>
               )}
 
+              {/* Payment Option */}
+              {selectedPlan && depositAmount && parseFloat(depositAmount) >= (depositPlans.find(p => p.id === selectedPlan)?.minAmount || 0) && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-gray-900 mb-2">Payment Options:</h4>
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleCreateDeposit}
+                      className="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Pay from Balance (${user?.balance?.toFixed(2)})
+                    </button>
+                    <div 
+                      className="DePayButton w-full" 
+                      data-label="Pay with Crypto" 
+                      data-integration="2f3cbb13-1065-448c-9822-9d64f93a33e5" 
+                      data-blockchains='["ethereum"]'
+                      data-amount={parseFloat(depositAmount).toFixed(2)}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex space-x-4">
                 <button
                   onClick={() => setShowNewDeposit(false)}
@@ -330,17 +352,30 @@ const FixedDeposits = () => {
                 >
                   Cancel
                 </button>
-                <button
-                  onClick={handleCreateDeposit}
-                  className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all"
-                >
-                  Create Deposit
-                </button>
+                {(!selectedPlan || !depositAmount || parseFloat(depositAmount) < (depositPlans.find(p => p.id === selectedPlan)?.minAmount || 0)) && (
+                  <button
+                    disabled
+                    className="flex-1 bg-gray-300 text-gray-500 font-bold py-3 rounded-lg cursor-not-allowed"
+                  >
+                    Select Plan & Amount
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* DePay Scripts */}
+      <script src="https://integrate.depay.com/buttons/v13.js"></script>
+      <noscript>
+        <a href="https://depay.com">Web3 Payments</a> are only supported with JavaScript enabled.
+      </noscript>
+      <script>
+        {`if (typeof DePayButtons !== 'undefined') {
+          DePayButtons.init({document: document});
+        }`}
+      </script>
     </div>
   );
 };

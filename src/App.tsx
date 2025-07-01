@@ -11,6 +11,8 @@ import Trading from './pages/Trading';
 import Education from './pages/Education';
 import Support from './pages/Support';
 import Contact from './pages/Contact';
+import GoldShop from './pages/GoldShop';
+import TradingTools from './pages/TradingTools';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Component to handle automatic navigation after login
@@ -48,6 +50,8 @@ function App() {
             <Route path="/education" element={<Education />} />
             <Route path="/support" element={<Support />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/gold-shop" element={<GoldShop />} />
+            <Route path="/trading-tools" element={<TradingTools />} />
             <Route path="/dashboard" element={<ClientDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
           </Routes>

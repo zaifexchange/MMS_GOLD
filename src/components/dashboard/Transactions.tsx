@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, ArrowDownLeft, Filter, Download, Search, Calendar } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Filter, Download, Search, Calendar, Plus } from 'lucide-react';
 import { supabase, Transaction } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -11,6 +11,8 @@ const Transactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState('30days');
   const [loading, setLoading] = useState(true);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -77,6 +79,43 @@ const Transactions = () => {
     filtered = filtered.filter(t => new Date(t.created_at) >= filterDate);
 
     setFilteredTransactions(filtered);
+  };
+
+  const handleDeposit = async () => {
+    if (!depositAmount || !user) {
+      alert('Please enter a deposit amount');
+      return;
+    }
+
+    const amount = parseFloat(depositAmount);
+    if (amount < 10) {
+      alert('Minimum deposit amount is $10');
+      return;
+    }
+
+    try {
+      // Create pending transaction
+      const { error: transactionError } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: user.id,
+          type: 'deposit',
+          amount,
+          description: 'Crypto deposit via DePay',
+          status: 'pending',
+          reference_id: `DEP-${Date.now()}`,
+        });
+
+      if (transactionError) throw transactionError;
+
+      alert('Deposit initiated! Please complete the payment.');
+      setShowDepositModal(false);
+      setDepositAmount('');
+      fetchTransactions();
+    } catch (error) {
+      console.error('Error creating deposit:', error);
+      alert('Failed to initiate deposit');
+    }
   };
 
   const getTransactionIcon = (type: string) => {
@@ -162,6 +201,13 @@ const Transactions = () => {
           <p className="text-gray-600 mt-1">Track all your financial activities</p>
         </div>
         <div className="flex items-center space-x-4 mt-4 md:mt-0">
+          <button 
+            onClick={() => setShowDepositModal(true)}
+            className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Deposit</span>
+          </button>
           <button className="flex items-center space-x-2 bg-yellow-500 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-600 transition-colors">
             <Download className="h-4 w-4" />
             <span>Export</span>
@@ -303,6 +349,59 @@ const Transactions = () => {
         )}
       </div>
 
+      {/* Deposit Modal */}
+      {showDepositModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Make a Deposit</h3>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Deposit Amount (USD)
+              </label>
+              <input
+                type="number"
+                min="10"
+                step="0.01"
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                placeholder="Enter amount (min $10)"
+              />
+              <p className="text-sm text-gray-600 mt-1">Minimum deposit: $10</p>
+            </div>
+
+            {depositAmount && parseFloat(depositAmount) >= 10 && (
+              <div className="mb-6">
+                <div 
+                  className="DePayButton" 
+                  data-label="Deposit Now" 
+                  data-integration="2f3cbb13-1065-448c-9822-9d64f93a33e5" 
+                  data-blockchains='["ethereum"]'
+                  data-amount={parseFloat(depositAmount).toFixed(2)}
+                ></div>
+              </div>
+            )}
+
+            <div className="flex space-x-4">
+              <button
+                onClick={() => setShowDepositModal(false)}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeposit}
+                disabled={!depositAmount || parseFloat(depositAmount) < 10}
+                className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Pagination */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-600">
@@ -320,6 +419,17 @@ const Transactions = () => {
           </button>
         </div>
       </div>
+
+      {/* DePay Scripts */}
+      <script src="https://integrate.depay.com/buttons/v13.js"></script>
+      <noscript>
+        <a href="https://depay.com">Web3 Payments</a> are only supported with JavaScript enabled.
+      </noscript>
+      <script>
+        {`if (typeof DePayButtons !== 'undefined') {
+          DePayButtons.init({document: document});
+        }`}
+      </script>
     </div>
   );
 };
