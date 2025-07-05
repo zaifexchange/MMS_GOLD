@@ -12,7 +12,8 @@ import {
   Globe,
   Database,
   UserCheck,
-  TrendingUp
+  TrendingUp,
+  Target
 } from 'lucide-react';
 
 const AdminSidebar = () => {
@@ -21,6 +22,7 @@ const AdminSidebar = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
     { icon: Users, label: 'User Management', path: '/admin/users' },
+    { icon: Target, label: 'Predictions', path: '/admin/predictions' },
     { icon: CreditCard, label: 'Transactions', path: '/admin/transactions' },
     { icon: TrendingUp, label: 'Trading', path: '/admin/trading' },
     { icon: UserCheck, label: 'KYC Verification', path: '/admin/kyc' },

@@ -12,6 +12,7 @@ import Support from './pages/Support';
 import Contact from './pages/Contact';
 import GoldShop from './pages/GoldShop';
 import TradingTools from './pages/TradingTools';
+import GoldPrediction from './pages/GoldPrediction';
 import AdminLogin from './pages/AdminLogin';
 
 // Admin Pages
@@ -19,6 +20,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import WebsiteContent from './pages/admin/WebsiteContent';
 import SystemSettings from './pages/admin/SystemSettings';
+import PredictionManagement from './pages/admin/PredictionManagement';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -56,6 +58,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/trading" element={<Trading />} />
+            <Route path="/gold-prediction" element={<GoldPrediction />} />
             <Route path="/education" element={<Education />} />
             <Route path="/support" element={<Support />} />
             <Route path="/contact" element={<Contact />} />
@@ -70,6 +73,7 @@ function App() {
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/content" element={<WebsiteContent />} />
             <Route path="/admin/settings" element={<SystemSettings />} />
+            <Route path="/admin/predictions" element={<PredictionManagement />} />
           </Routes>
         </div>
       </Router>

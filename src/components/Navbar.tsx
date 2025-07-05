@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, TrendingUp, LogIn, UserPlus, ShoppingCart, Bot } from 'lucide-react';
+import { Menu, X, TrendingUp, LogIn, UserPlus, ShoppingCart, Bot, Target } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
@@ -39,6 +39,10 @@ const Navbar = () => {
             </Link>
             <Link to="/trading" className="text-white hover:text-yellow-400 transition-colors font-medium">
               Trading
+            </Link>
+            <Link to="/gold-prediction" className="text-white hover:text-yellow-400 transition-colors font-medium flex items-center space-x-1">
+              <Target className="h-4 w-4" />
+              <span>Gold Prediction</span>
             </Link>
             <Link to="/gold-shop" className="text-white hover:text-yellow-400 transition-colors font-medium flex items-center space-x-1">
               <ShoppingCart className="h-4 w-4" />
@@ -120,6 +124,9 @@ const Navbar = () => {
             </Link>
             <Link to="/trading" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
               Trading
+            </Link>
+            <Link to="/gold-prediction" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
+              Gold Prediction
             </Link>
             <Link to="/gold-shop" className="block px-3 py-2 text-white hover:text-yellow-400 transition-colors">
               Gold Shop
