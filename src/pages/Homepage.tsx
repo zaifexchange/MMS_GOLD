@@ -5,6 +5,7 @@ import Services from '../components/ServicesSection';
 import Benefits from '../components/Benefits';
 import GoldGrowthNetwork from '../components/GoldGrowthNetwork';
 import AdminLoginSection from '../components/AdminLoginSection';
+import AdminQuickAccess from '../components/AdminQuickAccess';
 import Footer from '../components/Footer';
 
 const Homepage = () => {
@@ -17,6 +18,9 @@ const Homepage = () => {
       <GoldGrowthNetwork />
       <AdminLoginSection />
       <Footer />
+      
+      {/* Admin Quick Access - Only visible in development */}
+      {import.meta.env.DEV && <AdminQuickAccess />}
     </div>
   );
 };

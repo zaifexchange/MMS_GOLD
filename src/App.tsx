@@ -12,6 +12,7 @@ import Support from './pages/Support';
 import Contact from './pages/Contact';
 import GoldShop from './pages/GoldShop';
 import TradingTools from './pages/TradingTools';
+import AdminLogin from './pages/AdminLogin';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -51,6 +52,7 @@ function App() {
             <Route path="/" element={<Homepage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/trading" element={<Trading />} />
