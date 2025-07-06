@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Activity } from 'lucide-react';
 import { supabase, Trade, Transaction } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import TradingViewWidget from '../TradingViewWidget';
 
 const TradingOverview = () => {
   const { user } = useAuth();
@@ -217,15 +218,11 @@ const TradingOverview = () => {
         ))}
       </div>
 
-      {/* Chart Placeholder */}
+      {/* TradingView Chart */}
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-6">Gold Price Chart</h3>
-        <div className="h-80 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-          <div className="text-center">
-            <TrendingUp className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-gray-600 mb-2">TradingView Chart</h4>
-            <p className="text-gray-500">Chart will be integrated here</p>
-          </div>
+        <h3 className="text-xl font-bold text-gray-900 mb-6">Live Gold Price Chart</h3>
+        <div className="h-96 w-full">
+          <TradingViewWidget />
         </div>
       </div>
 
