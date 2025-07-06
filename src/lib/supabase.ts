@@ -12,6 +12,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.log('Please check your .env file contains:');
   console.log('VITE_SUPABASE_URL=your_supabase_url');
   console.log('VITE_SUPABASE_ANON_KEY=your_supabase_anon_key');
+  
+  // Show user-friendly error
+  alert('Database not configured. Please set up Supabase connection first.');
 }
 
 export const supabase = createClient(

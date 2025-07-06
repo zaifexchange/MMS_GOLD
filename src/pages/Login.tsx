@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, TrendingUp } from 'lucide-react';
+import { Eye, EyeOff, TrendingUp, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
@@ -10,11 +10,26 @@ const Login = () => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Check if Supabase is configured
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const isSupabaseConfigured = supabaseUrl && supabaseKey && 
+    supabaseUrl !== 'https://placeholder.supabase.co' && 
+    supabaseKey !== 'placeholder-key';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    if (!isSupabaseConfigured) {
+      setError('Database not configured. Please set up Supabase connection first.');
+      return;
+    }
+    
     setLoading(true);
     
     try {
@@ -22,11 +37,42 @@ const Login = () => {
       // Navigation will be handled by the auth context
     } catch (error: any) {
       console.error('Login failed:', error);
-      alert(error.message || 'Login failed');
+      setError(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+          <div className="text-center mb-8">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900">Database Not Configured</h2>
+            <p className="text-gray-600 mt-2">Please set up Supabase connection first</p>
+          </div>
+
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <h3 className="font-semibold text-red-900 mb-2">Setup Required</h3>
+            <ol className="text-sm text-red-800 space-y-1 list-decimal list-inside">
+              <li>Click "Connect to Supabase" button</li>
+              <li>Create a new Supabase project</li>
+              <li>Run the database migrations</li>
+              <li>Set up environment variables</li>
+            </ol>
+          </div>
+
+          <Link 
+            to="/"
+            className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold py-3 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all text-center block"
+          >
+            Back to Homepage
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center px-4">
@@ -41,6 +87,15 @@ const Login = () => {
           <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
           <p className="text-gray-600 mt-2">Sign in to your account</p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -106,6 +161,15 @@ const Login = () => {
               Sign up here
             </Link>
           </p>
+        </div>
+
+        {/* Demo Credentials */}
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+          <h4 className="font-semibold text-blue-900 mb-2">Demo Credentials</h4>
+          <div className="text-sm text-blue-800 space-y-1">
+            <p><strong>Admin:</strong> monirhasan2003@gmail.com / Zarra-852882</p>
+            <p><strong>Note:</strong> Create account first if it doesn't exist</p>
+          </div>
         </div>
       </div>
     </div>
