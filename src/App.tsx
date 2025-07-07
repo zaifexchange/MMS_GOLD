@@ -23,6 +23,7 @@ import SystemSettings from './pages/admin/SystemSettings';
 import PredictionManagement from './pages/admin/PredictionManagement';
 import TransactionManagement from './pages/admin/TransactionManagement';
 import Analytics from './pages/admin/Analytics';
+import TradingManagement from './pages/admin/TradingManagement';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -78,6 +79,7 @@ function App() {
             <Route path="/admin/predictions" element={<PredictionManagement />} />
             <Route path="/admin/transactions" element={<TransactionManagement />} />
             <Route path="/admin/analytics" element={<Analytics />} />
+            <Route path="/admin/trading" element={<TradingManagement />} />
           </Routes>
         </div>
       </Router>
