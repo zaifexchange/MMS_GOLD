@@ -21,6 +21,8 @@ import UserManagement from './pages/admin/UserManagement';
 import WebsiteContent from './pages/admin/WebsiteContent';
 import SystemSettings from './pages/admin/SystemSettings';
 import PredictionManagement from './pages/admin/PredictionManagement';
+import TransactionManagement from './pages/admin/TransactionManagement';
+import Analytics from './pages/admin/Analytics';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -74,6 +76,8 @@ function App() {
             <Route path="/admin/content" element={<WebsiteContent />} />
             <Route path="/admin/settings" element={<SystemSettings />} />
             <Route path="/admin/predictions" element={<PredictionManagement />} />
+            <Route path="/admin/transactions" element={<TransactionManagement />} />
+            <Route path="/admin/analytics" element={<Analytics />} />
           </Routes>
         </div>
       </Router>

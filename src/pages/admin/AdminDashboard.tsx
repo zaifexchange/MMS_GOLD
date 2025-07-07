@@ -8,7 +8,10 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Target,
+  CreditCard,
+  BarChart3
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -19,7 +22,9 @@ const AdminDashboard = () => {
     activeTrades: 0,
     pendingKYC: 0,
     totalBalance: 0,
-    monthlyGrowth: 0
+    monthlyGrowth: 0,
+    activePredictions: 0,
+    totalPredictions: 0
   });
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +68,16 @@ const AdminDashboard = () => {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending');
 
+      // Fetch prediction stats
+      const { count: activePredictions } = await supabase
+        .from('prediction_questions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      const { count: totalPredictions } = await supabase
+        .from('user_predictions')
+        .select('*', { count: 'exact', head: true });
+
       // Fetch recent activity
       const { data: activity } = await supabase
         .from('transactions')
@@ -79,7 +94,9 @@ const AdminDashboard = () => {
         activeTrades: activeTrades || 0,
         pendingKYC: pendingKYC || 0,
         totalBalance,
-        monthlyGrowth: 12.5 // This would be calculated based on historical data
+        monthlyGrowth: 12.5,
+        activePredictions: activePredictions || 0,
+        totalPredictions: totalPredictions || 0
       });
 
       setRecentActivity(activity || []);
@@ -116,12 +133,12 @@ const AdminDashboard = () => {
       change: '+15%'
     },
     {
-      title: 'Pending KYC',
-      value: stats.pendingKYC.toString(),
-      icon: Shield,
-      color: 'text-red-600',
-      bg: 'bg-red-100',
-      change: '-5%'
+      title: 'Active Predictions',
+      value: stats.activePredictions.toString(),
+      icon: Target,
+      color: 'text-purple-600',
+      bg: 'bg-purple-100',
+      change: `${stats.totalPredictions} total`
     }
   ];
 
@@ -163,8 +180,8 @@ const AdminDashboard = () => {
                 <div>
                   <p className="text-gray-600 text-sm font-medium">{stat.title}</p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                  <p className={`text-sm font-medium mt-1 ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                    {stat.change} from last month
+                  <p className={`text-sm font-medium mt-1 ${stat.change.startsWith('+') ? 'text-green-600' : 'text-blue-600'}`}>
+                    {stat.change}
                   </p>
                 </div>
                 <div className={`p-3 rounded-full ${stat.bg}`}>
@@ -204,29 +221,29 @@ const AdminDashboard = () => {
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-4">
-              <button className="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-left">
+              <a href="/admin/users" className="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-left block">
                 <Users className="h-8 w-8 text-blue-600 mb-2" />
                 <h4 className="font-semibold text-gray-900">Manage Users</h4>
                 <p className="text-sm text-gray-600">View and edit user accounts</p>
-              </button>
+              </a>
               
-              <button className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-left">
-                <DollarSign className="h-8 w-8 text-green-600 mb-2" />
+              <a href="/admin/predictions" className="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors text-left block">
+                <Target className="h-8 w-8 text-purple-600 mb-2" />
+                <h4 className="font-semibold text-gray-900">Predictions</h4>
+                <p className="text-sm text-gray-600">Manage prediction questions</p>
+              </a>
+              
+              <a href="/admin/transactions" className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-left block">
+                <CreditCard className="h-8 w-8 text-green-600 mb-2" />
                 <h4 className="font-semibold text-gray-900">Transactions</h4>
                 <p className="text-sm text-gray-600">Monitor financial activity</p>
-              </button>
+              </a>
               
-              <button className="p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors text-left">
-                <Shield className="h-8 w-8 text-yellow-600 mb-2" />
-                <h4 className="font-semibold text-gray-900">KYC Review</h4>
-                <p className="text-sm text-gray-600">Verify user documents</p>
-              </button>
-              
-              <button className="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors text-left">
-                <TrendingUp className="h-8 w-8 text-purple-600 mb-2" />
+              <a href="/admin/analytics" className="p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors text-left block">
+                <BarChart3 className="h-8 w-8 text-yellow-600 mb-2" />
                 <h4 className="font-semibold text-gray-900">Analytics</h4>
                 <p className="text-sm text-gray-600">View detailed reports</p>
-              </button>
+              </a>
             </div>
           </div>
         </div>
