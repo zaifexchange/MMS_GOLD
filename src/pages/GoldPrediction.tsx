@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { TrendingUp, TrendingDown, Clock, DollarSign, Target, Award, CheckCircle, XCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, DollarSign, Target, Award, CheckCircle, XCircle, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -53,20 +53,50 @@ const GoldPrediction = () => {
 
   const fetchQuestions = async () => {
     try {
+      // First try to fetch from database
       const { data, error } = await supabase
         .from('prediction_questions')
         .select('*')
-        .eq('status', 'active')
+        .in('status', ['active', 'closed'])
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setQuestions(data || []);
+      if (error) {
+        console.error('Database error:', error);
+        // If database fails, use default questions
+        setQuestions(getDefaultQuestions());
+      } else if (data && data.length > 0) {
+        setQuestions(data);
+      } else {
+        // If no questions in database, create default ones
+        await createDefaultQuestions();
+        setQuestions(getDefaultQuestions());
+      }
     } catch (error) {
       console.error('Error fetching questions:', error);
-      // Fallback to default questions if table doesn't exist
+      // Fallback to default questions
       setQuestions(getDefaultQuestions());
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createDefaultQuestions = async () => {
+    const defaultQuestions = getDefaultQuestions();
+    
+    try {
+      for (const question of defaultQuestions) {
+        await supabase
+          .from('prediction_questions')
+          .insert({
+            question: question.question,
+            description: question.description,
+            deadline: question.deadline,
+            multiplier: question.multiplier,
+            status: question.status
+          });
+      }
+    } catch (error) {
+      console.error('Error creating default questions:', error);
     }
   };
 
@@ -80,8 +110,11 @@ const GoldPrediction = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setUserPredictions(data || []);
+      if (error) {
+        console.error('Error fetching user predictions:', error);
+      } else {
+        setUserPredictions(data || []);
+      }
     } catch (error) {
       console.error('Error fetching user predictions:', error);
     }
@@ -96,7 +129,10 @@ const GoldPrediction = () => {
         .select('*')
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching user stats:', error);
+        return;
+      }
 
       const predictions = data || [];
       const totalPredictions = predictions.length;
@@ -119,136 +155,55 @@ const GoldPrediction = () => {
 
   const getDefaultQuestions = (): PredictionQuestion[] => [
     {
-      id: '1',
-      question: 'Will the price of gold exceed $3,400 per ounce at 7 PM tomorrow during the NFP report release?',
-      description: 'Non-Farm Payroll (NFP) reports often cause significant volatility in gold prices.',
-      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      id: 'default-1',
+      question: 'Will the price of gold exceed $2,100 per ounce by the end of this week?',
+      description: 'Gold has been showing strong momentum. Technical indicators suggest a potential breakout above key resistance levels.',
+      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       multiplier: 1.9,
       status: 'active',
       created_at: new Date().toISOString()
     },
     {
-      id: '2',
-      question: 'Will the price of gold drop by 5% or more within the next month?',
-      description: 'Major corrections in gold prices can present significant opportunities.',
+      id: 'default-2',
+      question: 'Will gold prices drop below $2,000 per ounce within the next month?',
+      description: 'Economic indicators and Fed policy decisions could impact gold prices significantly in the coming weeks.',
       deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       multiplier: 1.9,
       status: 'active',
       created_at: new Date().toISOString()
     },
     {
-      id: '3',
-      question: 'Will the price of gold fall below $3,300 per ounce during the next FOMC report?',
-      description: 'Federal Open Market Committee decisions heavily influence precious metals.',
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      multiplier: 1.9,
-      status: 'active',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '4',
-      question: 'Will the market closing price of gold tomorrow be above $3,500 per ounce?',
-      description: 'Daily closing prices are crucial for technical analysis and trend determination.',
-      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      multiplier: 1.9,
-      status: 'active',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '5',
-      question: 'Will gold prices rise by more than 3% within the next week following the US CPI data release?',
-      description: 'Consumer Price Index data is a key inflation indicator affecting gold prices.',
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      multiplier: 1.9,
-      status: 'active',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '6',
-      question: 'Will the price of gold stay above $3,200 per ounce during the next ECB interest rate announcement?',
-      description: 'European Central Bank decisions impact global precious metals markets.',
+      id: 'default-3',
+      question: 'Will the price of gold reach $2,200 per ounce before the next FOMC meeting?',
+      description: 'Federal Open Market Committee decisions heavily influence precious metals markets and investor sentiment.',
       deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
       multiplier: 1.9,
       status: 'active',
       created_at: new Date().toISOString()
     },
     {
-      id: '7',
-      question: 'Will gold prices surpass $3,600 per ounce before the next US Federal Reserve meeting?',
-      description: 'Federal Reserve meetings are major market-moving events for precious metals.',
-      deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
+      id: 'default-4',
+      question: 'Will gold prices rise by more than 5% this month?',
+      description: 'Current market conditions and geopolitical tensions could drive significant gold price movements.',
+      deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
       multiplier: 1.9,
       status: 'active',
       created_at: new Date().toISOString()
     },
     {
-      id: '8',
-      question: 'Will the price of gold decline by more than 2% on the day of the next US unemployment report?',
-      description: 'Employment data releases often trigger immediate market reactions.',
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      multiplier: 1.9,
-      status: 'active',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '9',
-      question: 'Will gold prices be higher than $3,450 per ounce at the close of the next trading week?',
-      description: 'Weekly closing levels are important for medium-term trend analysis.',
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      multiplier: 1.9,
-      status: 'active',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '10',
-      question: 'Will the price of gold drop below $3,150 per ounce during the next OPEC meeting?',
-      description: 'Oil market decisions can indirectly affect precious metals through currency impacts.',
-      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      multiplier: 1.9,
-      status: 'active',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '11',
-      question: 'Will gold prices increase by more than 4% within the next two weeks after the US GDP report?',
-      description: 'Gross Domestic Product data reflects economic health and affects safe-haven demand.',
+      id: 'default-5',
+      question: 'Will the gold-to-silver ratio exceed 80:1 within two weeks?',
+      description: 'The gold-to-silver ratio is a key indicator watched by precious metals traders worldwide.',
       deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
       multiplier: 1.9,
       status: 'active',
       created_at: new Date().toISOString()
     },
     {
-      id: '12',
-      question: 'Will the price of gold remain below $3,700 per ounce at the next market close following a US retail sales report?',
-      description: 'Retail sales data indicates consumer spending patterns and economic strength.',
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      multiplier: 1.9,
-      status: 'active',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '13',
-      question: 'Will gold prices exceed $3,500 per ounce during the next Bank of Japan interest rate decision?',
-      description: 'Japanese monetary policy affects global currency markets and precious metals.',
-      deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
-      multiplier: 1.9,
-      status: 'active',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '14',
-      question: 'Will the price of gold fall by more than 3% within the next 10 days after a US PPI report release?',
-      description: 'Producer Price Index data provides early inflation signals affecting precious metals.',
+      id: 'default-6',
+      question: 'Will gold close above $2,050 for five consecutive trading days?',
+      description: 'Sustained price levels above key psychological levels often indicate strong market sentiment.',
       deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
-      multiplier: 1.9,
-      status: 'active',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '15',
-      question: 'Will gold prices be above $3,300 per ounce at the close of the next trading day after a US housing starts report?',
-      description: 'Housing market data reflects economic activity and investment demand patterns.',
-      deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
       multiplier: 1.9,
       status: 'active',
       created_at: new Date().toISOString()
@@ -296,7 +251,11 @@ const GoldPrediction = () => {
           status: 'pending'
         });
 
-      if (predictionError) throw predictionError;
+      if (predictionError) {
+        console.error('Prediction error:', predictionError);
+        alert('Failed to submit prediction. Please try again.');
+        return;
+      }
 
       // Create transaction record
       const { error: transactionError } = await supabase
@@ -310,7 +269,9 @@ const GoldPrediction = () => {
           reference_id: `PRED-${Date.now()}`
         });
 
-      if (transactionError) throw transactionError;
+      if (transactionError) {
+        console.error('Transaction error:', transactionError);
+      }
 
       // Update user balance
       const { error: balanceError } = await supabase
@@ -318,7 +279,9 @@ const GoldPrediction = () => {
         .update({ balance: user.balance - amount })
         .eq('id', user.id);
 
-      if (balanceError) throw balanceError;
+      if (balanceError) {
+        console.error('Balance error:', balanceError);
+      }
 
       alert('Prediction submitted successfully!');
       setShowPredictionModal(false);
@@ -356,7 +319,12 @@ const GoldPrediction = () => {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="flex justify-center items-center h-64">Loading...</div>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading predictions...</p>
+          </div>
+        </div>
         <Footer />
       </div>
     );
@@ -386,11 +354,11 @@ const GoldPrediction = () => {
             <h2 className="text-xl font-bold mb-2">Live Gold Price (XAU/USD)</h2>
             <div className="flex items-center justify-center space-x-8">
               <div className="text-center">
-                <div className="text-3xl font-bold">$3,245.32</div>
+                <div className="text-3xl font-bold">$2,045.32</div>
                 <div className="text-sm opacity-90">Current Price</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-green-700">+45.25 (+1.42%)</div>
+                <div className="text-xl font-bold text-green-700">+12.45 (+0.61%)</div>
                 <div className="text-sm opacity-90">24h Change</div>
               </div>
             </div>
@@ -438,85 +406,93 @@ const GoldPrediction = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {questions.map((question) => {
-              const userPrediction = getUserPredictionForQuestion(question.id);
-              const timeRemaining = getTimeRemaining(question.deadline);
-              const isExpired = timeRemaining === 'Expired';
-              
-              return (
-                <div key={question.id} className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">{question.question}</h3>
-                      <p className="text-gray-600 text-sm mb-4">{question.description}</p>
-                    </div>
-                    <div className="ml-4 text-right">
-                      <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold">
-                        {question.multiplier}x Payout
+          {questions.length === 0 ? (
+            <div className="text-center py-12">
+              <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No Active Predictions</h3>
+              <p className="text-gray-600">Check back soon for new prediction opportunities!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {questions.map((question) => {
+                const userPrediction = getUserPredictionForQuestion(question.id);
+                const timeRemaining = getTimeRemaining(question.deadline);
+                const isExpired = timeRemaining === 'Expired';
+                
+                return (
+                  <div key={question.id} className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">{question.question}</h3>
+                        <p className="text-gray-600 text-sm mb-4">{question.description}</p>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="flex items-center space-x-1 text-gray-600">
-                      <Clock className="h-4 w-4" />
-                      <span className="text-sm">{timeRemaining}</span>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Deadline: {new Date(question.deadline).toLocaleDateString()}
-                    </div>
-                  </div>
-
-                  {userPrediction ? (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-semibold text-blue-900">Your Prediction</p>
-                          <p className="text-blue-700">
-                            {userPrediction.prediction ? 'YES' : 'NO'} - ${userPrediction.amount}
-                          </p>
-                          <p className="text-sm text-blue-600">
-                            Potential payout: ${userPrediction.potential_payout.toFixed(2)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            userPrediction.status === 'pending' 
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : userPrediction.status === 'won'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {userPrediction.status.charAt(0).toUpperCase() + userPrediction.status.slice(1)}
-                          </span>
+                      <div className="ml-4 text-right">
+                        <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold">
+                          {question.multiplier}x Payout
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex space-x-4">
-                      <button
-                        onClick={() => handleMakePrediction(question)}
-                        disabled={isExpired}
-                        className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                      >
-                        <TrendingUp className="h-5 w-5" />
-                        <span>Predict YES</span>
-                      </button>
-                      <button
-                        onClick={() => handleMakePrediction(question)}
-                        disabled={isExpired}
-                        className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                      >
-                        <TrendingDown className="h-5 w-5" />
-                        <span>Predict NO</span>
-                      </button>
+
+                    <div className="flex items-center space-x-4 mb-6">
+                      <div className="flex items-center space-x-1 text-gray-600">
+                        <Clock className="h-4 w-4" />
+                        <span className="text-sm">{timeRemaining}</span>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Deadline: {new Date(question.deadline).toLocaleDateString()}
+                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+
+                    {userPrediction ? (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-blue-900">Your Prediction</p>
+                            <p className="text-blue-700">
+                              {userPrediction.prediction ? 'YES' : 'NO'} - ${userPrediction.amount}
+                            </p>
+                            <p className="text-sm text-blue-600">
+                              Potential payout: ${userPrediction.potential_payout.toFixed(2)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              userPrediction.status === 'pending' 
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : userPrediction.status === 'won'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {userPrediction.status.charAt(0).toUpperCase() + userPrediction.status.slice(1)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex space-x-4">
+                        <button
+                          onClick={() => handleMakePrediction(question)}
+                          disabled={isExpired}
+                          className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                        >
+                          <TrendingUp className="h-5 w-5" />
+                          <span>Predict YES</span>
+                        </button>
+                        <button
+                          onClick={() => handleMakePrediction(question)}
+                          disabled={isExpired}
+                          className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-3 rounded-lg hover:from-red-600 hover:to-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                        >
+                          <TrendingDown className="h-5 w-5" />
+                          <span>Predict NO</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
